@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { MUSCLES, EQUIPMENT, inputCls } from '@/lib/constants';
+import { MUSCLES, EQUIPMENT, inputCls, btnPrimary } from '@/lib/constants';
+import IntInput from '@/components/IntInput';
 
 export default function AddExerciseForm() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -15,8 +16,8 @@ export default function AddExerciseForm() {
   const [equipment, setEquipment] = useState<string>(EQUIPMENT[0]);
   const [primary, setPrimary] = useState<string>(MUSCLES[0]);
   const [secondary, setSecondary] = useState<string[]>([]);
-  const [sets, setSets] = useState(3);
-  const [reps, setReps] = useState(10);
+  const [sets, setSets] = useState<number>(3);
+  const [reps, setReps] = useState<number>(10);
   const [notes, setNotes] = useState('');
 
   useEffect(() => {
@@ -79,7 +80,7 @@ export default function AddExerciseForm() {
   if (!userEmail) {
     return (
       <form onSubmit={signIn} className="grid gap-3 max-w-sm">
-        <h2 className="text-xl font-semibold">Sign in to add exercises</h2>
+        <h2 className="text-xl font-semibold">Administrator sign in</h2>
         <input
           type="email" placeholder="Email" className={inputCls} required
           value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)}
@@ -88,8 +89,8 @@ export default function AddExerciseForm() {
           type="password" placeholder="Password" className={inputCls} required
           value={password} onChange={(e) => setPassword(e.target.value)}
         />
-        <button className="bg-blue-600 text-white px-4 py-2 rounded">Sign in</button>
-        {message && <p className="text-red-600">{message}</p>}
+        <button className={btnPrimary}>Sign in</button>
+        {message && <p className="text-danger">{message}</p>}
       </form>
     );
   }
@@ -102,19 +103,19 @@ export default function AddExerciseForm() {
       </p>
 
       <form onSubmit={addExercise} className="grid gap-3 max-w-lg">
-        <label className="flex flex-col">
+        <label className="flex flex-col gap-1">
           Exercise name
           <input className={inputCls} value={name} onChange={(e) => setName(e.target.value)} />
         </label>
 
-        <label className="flex flex-col">
+        <label className="flex flex-col gap-1">
           Equipment
           <select className={inputCls} value={equipment} onChange={(e) => setEquipment(e.target.value)}>
             {EQUIPMENT.map((x) => <option key={x}>{x}</option>)}
           </select>
         </label>
 
-        <label className="flex flex-col">
+        <label className="flex flex-col gap-1">
           Primary muscle
           <select className={inputCls} value={primary} onChange={(e) => setPrimary(e.target.value)}>
             {MUSCLES.map((x) => <option key={x}>{x}</option>)}
@@ -127,7 +128,8 @@ export default function AddExerciseForm() {
             {MUSCLES.filter((m) => m !== primary).map((m) => (
               <label key={m} className="flex items-center gap-1">
                 <input
-                  type="checkbox" checked={secondary.includes(m)}
+                  type="checkbox" className="accent-accent"
+                  checked={secondary.includes(m)}
                   onChange={() => toggleSecondary(m)}
                 />
                 {m}
@@ -137,34 +139,26 @@ export default function AddExerciseForm() {
         </fieldset>
 
         <div className="flex gap-3">
-          <label className="flex flex-col">
+          <label className="flex flex-col gap-1">
             Sets
-            <input
-              type="number" min={1} className={`${inputCls} w-24`} value={sets}
-              onChange={(e) => setSets(Math.max(1, Math.floor(Number(e.target.value)) || 1))}
-              onFocus={(e) => e.target.select()}
-            />
+            <IntInput value={sets} min={1} max={99} className="w-24"
+              onChange={(v) => setSets(v === '' ? 1 : v)} />
           </label>
-          <label className="flex flex-col">
+          <label className="flex flex-col gap-1">
             Reps
-            <input
-              type="number" min={1} className={`${inputCls} w-24`} value={reps}
-              onChange={(e) => setReps(Math.max(1, Math.floor(Number(e.target.value)) || 1))}
-              onFocus={(e) => e.target.select()}
-            />
+            <IntInput value={reps} min={1} max={999} className="w-24"
+              onChange={(v) => setReps(v === '' ? 1 : v)} />
           </label>
         </div>
 
-        <label className="flex flex-col">
+        <label className="flex flex-col gap-1">
           Notes (optional)
           <input className={inputCls} value={notes} onChange={(e) => setNotes(e.target.value)} />
         </label>
 
-        <button className="bg-green-600 text-white px-4 py-2 rounded">Add exercise</button>
+        <button className={btnPrimary}>Add exercise</button>
         {message && (
-          <p className={message.startsWith('Error') ? 'text-red-600' : 'text-green-600'}>
-            {message}
-          </p>
+          <p className={message.startsWith('Error') ? 'text-danger' : 'text-ok'}>{message}</p>
         )}
       </form>
     </div>
